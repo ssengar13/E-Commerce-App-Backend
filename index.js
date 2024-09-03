@@ -5,6 +5,7 @@ const dotenv = require("dotenv").config();
 const PORT = process.env.PORT || 5000;
 const authRouter = require("./routes/authRoute");
 const bodyParser = require("body-parser");
+const { notFound, errorHandler } = require("./middlewares/errorHandler");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
@@ -12,6 +13,10 @@ app.use(bodyParser.urlencoded({ extended: false}));
 dbConnect();
 
 app.use("/api/user", authRouter);
+
+app.use(notFound);
+app.use(errorHandler);
+
 app.listen(PORT, () =>{
     console.log(`server is running at PORT ${PORT}`);
 });
