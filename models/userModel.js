@@ -1,5 +1,7 @@
 const mongoose = require('mongoose'); 
 const bcrypt = require('bcrypt');
+const { Schema } = mongoose;
+const ObjectId = Schema.Types.ObjectId;
 
 // Declare the Schema of the Mongo model
 var userSchema = new mongoose.Schema({
@@ -28,14 +30,28 @@ var userSchema = new mongoose.Schema({
     role:{
         type:String,
         default:"user",
-    }
-});
+    },
+    isBlocked:{
+        type: Boolean,
+        default: false,
+    },
+    cart:{
+        type:Array,
+        default: [],
+    },
+    address:[{type: ObjectId, ref: "Address" }],
+    wishlist:[{type: ObjectId, ref: "Product" }],
+},
+{
+    timestamps: true,
+}
+);
 
 //hashing the password
 userSchema.pre('save', async function(next) {
     const salt = await bcrypt.genSaltSync(10);
     this.password = await bcrypt.hash(this.password, salt);
-})
+});
 
 
 //matching the password
