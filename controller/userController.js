@@ -1,6 +1,7 @@
 const { generateToken } = require("../config/jwtToken");
 const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
+const { validateMongoDbId } = require("../utils/validateMongodbId");
 
 // Create a User
 const createUser = asyncHandler(
@@ -46,6 +47,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
 
 const updateUser = asyncHandler(async(req, res) =>{
     const {_id} = req.user;
+    validateMongoDbId(_id);
     try{
         const updatedUser = await User.findByIdAndUpdate(_id, 
             {
@@ -78,6 +80,7 @@ const getAllUser = asyncHandler(async (req, res) => {
 
 const getAUser =  asyncHandler(async(req, res) => {
     const {id} = req.params;
+    validateMongoDbId(id);
     try{
         const getUser = await User.findById(id);
         res.json({getUser});
@@ -91,6 +94,7 @@ const getAUser =  asyncHandler(async(req, res) => {
 
 const deleteAUser =  asyncHandler(async(req, res) => {
     const {id} = req.params;
+    validateMongoDbId(id);
     try{
         const deleteUser = await User.findByIdAndDelete(id);
         res.json({deleteUser});
@@ -99,4 +103,49 @@ const deleteAUser =  asyncHandler(async(req, res) => {
     }
 });
 
-module.exports = { createUser, loginUserCtrl, getAllUser, getAUser, deleteAUser, updateUser};
+
+//Block a User
+
+const blockAUser = asyncHandler(async(req, res) => {
+    const {id} = req.params;
+    validateMongoDbId(id);
+    try{
+        const blockUser = await User.findByIdAndUpdate(
+            id, 
+            {
+                isBlocked: true,
+            },
+            {
+                new: true,
+            }
+        );
+        res.json(blockUser);
+    }catch (error){
+        throw new Error(error);
+    }
+});
+
+//Unblock a User
+
+const unblockAUser = asyncHandler(async(req, res) => {
+    const {id} = req.params;
+    validateMongoDbId(id);
+    try{
+        const unblockUser = await User.findByIdAndUpdate(
+            id, 
+            {
+                isBlocked: false,
+            },
+            {
+                new: true,
+            }
+        );
+        res.json({
+            message: "User Unblocked",
+        });
+    }catch (error){
+        throw new Error(error);
+    }
+});
+
+module.exports = { createUser, loginUserCtrl, getAllUser, getAUser, deleteAUser, updateUser, blockAUser, unblockAUser};
