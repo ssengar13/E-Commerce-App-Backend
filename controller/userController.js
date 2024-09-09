@@ -80,6 +80,31 @@ const handleRefreshToken = asyncHandler(async(req, res) => {
     // res.json(user);
 });
 
+//Logout Functionality
+const logout = asyncHandler(async (req, res) => {
+    const cookie = req.cookies;
+    if (!cookie?.refreshToken) {
+        throw new Error("No Refresh Token in Cookies");
+    }
+    const refreshToken = cookie.refreshToken;
+    // Find the user with the refresh token
+    const user = await User.findOne({ refreshToken });
+    if (!user) {
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: true,
+        });
+        return res.sendStatus(204); // No content
+    }
+    // Clear the refresh token in the user's document
+    await User.findOneAndUpdate({ refreshToken }, { refreshToken: "" });
+    // Clear the cookie
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: true,
+    });
+    res.sendStatus(204); // No content
+});
 
 //Update a User
 
@@ -186,4 +211,4 @@ const unblockAUser = asyncHandler(async(req, res) => {
     }
 });
 
-module.exports = { createUser, loginUserCtrl, getAllUser, getAUser, deleteAUser, updateUser, blockAUser, unblockAUser, handleRefreshToken};
+module.exports = { createUser, loginUserCtrl, getAllUser, getAUser, deleteAUser, updateUser, blockAUser, unblockAUser, handleRefreshToken, logout };
