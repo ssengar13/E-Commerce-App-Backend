@@ -6,11 +6,12 @@ const router = express.Router();
 router.post("/register", createUser);
 router.post("/login", loginUserCtrl);
 router.get("/all-users", getAllUser);
+router.get("/refresh", handleRefreshToken);
 router.get("/:id", authMiddleware, isAdmin, getAUser);
 router.delete("/:id", deleteAUser);
 router.put("/edit-user", authMiddleware, updateUser);
 router.put("/block-user/:id", authMiddleware, isAdmin, blockAUser);
 router.put("/unblock-user/:id", authMiddleware, isAdmin, unblockAUser );
-router.put("/refresh", handleRefreshToken );
+router.get("/refresh", handleRefreshToken );
 
 module.exports = router;
