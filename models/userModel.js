@@ -56,12 +56,15 @@ var userSchema = new mongoose.Schema({
 
 //hashing the password
 userSchema.pre('save', async function(next) {
-    if(!this.isModified(password)){
-        next();
+    if (!this.isModified('password')) {
+        return next();
     }
-    const salt = await bcrypt.genSaltSync(10);
+    
+    const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
+    next();
 });
+
 
 
 //matching the password
