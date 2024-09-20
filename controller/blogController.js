@@ -17,6 +17,7 @@ const createBlog = asyncHandler(async(req, res) => {
 //Update a blog
 const updateBlog = asyncHandler(async(req, res) => {
     const { id } = req.params;
+    validateMongoDbId(id);
     try{
         const updatedBlog = await Blog.findByIdAndUpdate({ _id: id }, req.body, {
             new: true,
@@ -30,6 +31,7 @@ const updateBlog = asyncHandler(async(req, res) => {
 //Fetch a Single Blog
 const getBlog = asyncHandler(async(req, res) => {
     const { id } = req.params;
+    validateMongoDbId(id);
     try{
         const findBlog = await Blog.findById({ _id: id });
         const updateViews = await Blog.findByIdAndUpdate({ _id: id }, 
@@ -60,6 +62,7 @@ const getAllBlog = asyncHandler(async(req, res) => {
 //Delete a blog
 const deleteBlog = asyncHandler(async(req, res) => {
     const { id } = req.params;
+    validateMongoDbId(id);
     try{
         const deletedBlog = await Blog.findByIdAndDelete({ _id: id });
         res.json(deletedBlog);
@@ -68,4 +71,17 @@ const deleteBlog = asyncHandler(async(req, res) => {
     }
 });
 
-module.exports = { createBlog, updateBlog, getBlog, getAllBlog, deleteBlog };
+//Likes in a blog
+const likeBlog = asyncHandler(async(req, res) => {
+    const {blogId} = req.body;
+    validateMongoDbId(blogId);
+    //Find the blog which you want to be liked...
+    const blog = await Blog.findById(blogId);
+    const userLoginId = req?.user?._id;
+
+    const isLiked = blog?.isLiked;
+
+});
+
+
+module.exports = { createBlog, updateBlog, getBlog, getAllBlog, deleteBlog, likeBlog };
