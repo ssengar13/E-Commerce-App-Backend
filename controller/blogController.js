@@ -33,7 +33,7 @@ const getBlog = asyncHandler(async(req, res) => {
     const { id } = req.params;
     validateMongoDbId(id);
     try{
-        const findBlog = await Blog.findById({ _id: id });
+        const findBlog = await Blog.findById({ _id: id }).populate("likes").populate("dislikes");
         const updateViews = await Blog.findByIdAndUpdate({ _id: id }, 
             {
                 $inc: {numViews: 1},
@@ -42,7 +42,7 @@ const getBlog = asyncHandler(async(req, res) => {
                 new: true,
             }
         )
-        res.json(updateViews);
+        res.json(findBlog);
     }catch(error) {
         throw new Error(error);
     }
