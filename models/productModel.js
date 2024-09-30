@@ -50,6 +50,7 @@ var productSchema = new mongoose.Schema({
     ratings:[
         {
             star: Number,
+            comment: String,
             postedBy: {
                 type: ObjectId,
                 ref: "User"
