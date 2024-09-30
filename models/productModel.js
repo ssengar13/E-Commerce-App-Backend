@@ -57,6 +57,10 @@ var productSchema = new mongoose.Schema({
 
         },
     ],
+    totalRating: {
+        type: String,
+        default: 0,
+    },
 },
 {
 timestamps: true
