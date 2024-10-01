@@ -2,6 +2,8 @@ const Blog = require("../models/blogModal");
 const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
 const { validateMongoDbId } = require("../utils/validateMongodbId");
+const cloudinaryUploadImg = require("../utils/cloudinary");
+const fs = require("fs");
 
 // Create a Blog
 const createBlog = asyncHandler(async(req, res) => {
@@ -159,4 +161,40 @@ const dislikeBlog = asyncHandler(async(req, res) => {
     }
 });
 
-module.exports = { createBlog, updateBlog, getBlog, getAllBlog, deleteBlog, likeBlog, dislikeBlog};
+
+const uploadImages = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongoDbId(id); // Validate the MongoDB ObjectId
+  
+    try {
+      const uploader = (path) => cloudinaryUploadImg(path, "images");
+      const urls = [];
+      const files = req.files;
+  
+      // Iterate over each file and upload to Cloudinary
+      for (const file of files) {
+        const { path } = file; // Destructure the file path from each file
+        const newPath = await uploader(path); // Upload to Cloudinary and get the URL
+        urls.push(newPath); // Store the returned URL
+        fs.unlinkSync(path);
+      }
+  
+      // Update the blog with the new image URLs
+      const newBlog = await Blog.findByIdAndUpdate(
+        { _id: id },
+        {
+          images: urls, // Save the URLs in the images field
+        },
+        {
+          new: true, // Return the updated document
+        }
+      );
+  
+      res.json(newBlog); // Return the updated Blog
+    } catch (error) {
+      throw new Error(error); // Pass the error to the async handler
+    }
+  });
+  
+
+module.exports = { createBlog, updateBlog, getBlog, getAllBlog, deleteBlog, likeBlog, dislikeBlog, uploadImages};

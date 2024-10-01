@@ -30,14 +30,11 @@ var blogSchema = new mongoose.Schema({
     },
     likes:[{ type: ObjectId, ref:"User"}],
     dislikes:[{ type: ObjectId, ref:"User"}],
-    image:{
-        type:String,
-        default: "https://img.freepik.com/free-photo/teamwork-making-online-blog_53876-94868.jpg?w=826&t=st=1726639386~exp=1726639986~hmac=408b4ecd700a4bc8b79493e0928a984ab795909d7e0ba6145fc69334dabeff45"
-    },
     author:{
         type: String,
         default: "Admin",
-    }
+    },
+    images: [],
 },{
     toJSON:{
         virtuals: true,
