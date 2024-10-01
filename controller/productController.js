@@ -3,6 +3,7 @@ const User = require("../models/userModel");
 const Product = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
+const { setDefaultAutoSelectFamilyAttemptTimeout } = require("net");
 
 
 //Create a Product
@@ -217,6 +218,8 @@ const rating = asyncHandler(async (req, res) => {
     }
 });
 
+const uploadImages = asyncHandler(async(req, res) => {
+    console.log(req.files);
+});
 
-
-module.exports = { createProduct, getaProduct, getAllProduct, updateProduct, deleteProduct, addToWishlist, rating };
+module.exports = { createProduct, getaProduct, getAllProduct, updateProduct, deleteProduct, addToWishlist, rating, uploadImages };
