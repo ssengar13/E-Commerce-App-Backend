@@ -59,6 +59,43 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
     }
 });
 
+
+//Admin Login Functinality
+const loginAdmin = asyncHandler(async (req, res) => {
+    const {email, password} = req.body;
+    // console.log(email, password);
+    //check if user exists or not
+    const findAdmin = await User.findOne({ email });
+    if(findAdmin.role !== 'admin'){
+        throw new Error("Not Authorized");
+    }
+    if (findAdmin && await findAdmin.isPasswordMatched(password)){
+        const refreshToken = await generateRefreshToken(findAdmin?._id);
+        const updateUser = await User.findByIdAndUpdate(findAdmin.id, 
+        {
+           refreshToken: refreshToken,
+        }, 
+        {
+           new : true
+        });
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            maxAge: 72*60*60*1000,  
+        })
+        res.json({
+            _id: findAdmin?._id,
+            firstname: findAdmin?.firstname,
+            lastname: findAdmin?.lastname,
+            email: findAdmin?.email,
+            mobile: findAdmin?.mobile,
+            token:generateToken(findAdmin?._id)
+        });
+    }else{
+        throw new Error("Invalid Credentials");
+    }
+});
+
+
 // Handle refresh token
 const handleRefreshToken = asyncHandler(async(req, res) => {
     const cookie = req.cookies;
@@ -270,4 +307,4 @@ const updatePassword = asyncHandler(async (req, res) => {
     res.json(user);
   });
 
-module.exports = { createUser, loginUserCtrl, getAllUser, getAUser, deleteAUser, updateUser, blockAUser, unblockAUser, handleRefreshToken, logout, updatePassword, forgotPasswordToken, resetPassword };
+module.exports = { createUser, loginUserCtrl, getAllUser, getAUser, deleteAUser, updateUser, blockAUser, unblockAUser, handleRefreshToken, logout, updatePassword, forgotPasswordToken, resetPassword, loginAdmin };
