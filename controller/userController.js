@@ -1,5 +1,7 @@
 const { generateToken } = require("../config/jwtToken");
 const User = require("../models/userModel");
+const Product = require("../models/productModel");
+const Cart = require("../models/cartModal");
 const asyncHandler = require("express-async-handler");
 const { validateMongoDbId } = require("../utils/validateMongodbId");
 const { generateRefreshToken } = require("../config/refreshToken");
@@ -168,6 +170,25 @@ const updateUser = asyncHandler(async(req, res) =>{
     }
 });
 
+//Save User Address functionality
+const saveAddress = asyncHandler(async(req, res, next) => {
+    const {_id} = req.user;
+    validateMongoDbId(_id);
+    try{
+        const updateAddress = await User.findByIdAndUpdate(_id, 
+            {
+                address: req?.body.address,
+            },
+            {
+                new: true,
+            }
+        );
+        res.json(updateAddress);
+    }catch (error){
+        throw new Error(error);
+    }
+});
+
 //Get all Users
 const getAllUser = asyncHandler(async (req, res) => {
     try{
@@ -266,7 +287,7 @@ const updatePassword = asyncHandler(async (req, res) => {
     }
   });
 
-
+//Forgot Password Token Genration
   const forgotPasswordToken = asyncHandler(async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
@@ -290,7 +311,7 @@ const updatePassword = asyncHandler(async (req, res) => {
     }
   });
 
-
+//Reset Password
   const resetPassword = asyncHandler(async (req, res) => {
     const { password } = req.body;
     const { token } = req.params;
@@ -307,7 +328,7 @@ const updatePassword = asyncHandler(async (req, res) => {
     res.json(user);
   });
 
-
+//Get Wishlisted
   const getWishlist = asyncHandler(async(req, res) => {
     const {_id} = req.user;
     try{
@@ -318,6 +339,22 @@ const updatePassword = asyncHandler(async (req, res) => {
     }
   });
 
+//Add to cart
+const userCart = asyncHandler(async(req, res) => {
+    const { cart } = req.body;
+    const { _id } = req.user;
+    validateMongoDbId(_id);
+    try{
+        let products = []
+        const user = await User.findById(_id);
+        //check if user already have products in cart
+        const alreadyExistCart = await Cart.findOne({ orderby: user._id });
+        if(alreadyExistCart){
+            alreadyExistCart.remove();
+        }
+    }catch (error) {
+        throw new Error(error);
+    }
+});
 
-
-module.exports = { createUser, loginUserCtrl, getAllUser, getAUser, deleteAUser, updateUser, blockAUser, unblockAUser, handleRefreshToken, logout, updatePassword, forgotPasswordToken, resetPassword, loginAdmin, getWishlist };
+module.exports = { createUser, loginUserCtrl, getAllUser, getAUser, deleteAUser, updateUser, blockAUser, unblockAUser, handleRefreshToken, logout, updatePassword, forgotPasswordToken, resetPassword, loginAdmin, getWishlist, saveAddress, userCart };
