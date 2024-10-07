@@ -1,4 +1,4 @@
-const Brand = require("../models/brandModal");
+const Brand = require("../models/brandModel");
 const asyncHandler = require("express-async-handler");
 const { validateMongoDbId } = require("../utils/validateMongodbId");
 
