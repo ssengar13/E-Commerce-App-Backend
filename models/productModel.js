@@ -4,30 +4,30 @@ const ObjectId = Schema.Types.ObjectId;
 
 // Declare the Schema of the Mongo model
 var productSchema = new mongoose.Schema({
-    title:{
-        type:String,
-        required:true,
-        trim:true,
+    title: {
+        type: String,
+        required: true,
+        trim: true,
     },
-    slug:{
-        type:String,
-        required:true,
-        unique:true,
+    slug: {
+        type: String,
+        required: true,
+        unique: true,
         lowercase: true,
     },
-    description:{
-        type:String,
-        required:true,
-    },
-    price:{
-        type:Number,
-        required:true,
-    },
-    category:{
+    description: {
         type: String,
-        required:true,
+        required: true,
     },
-    brand:{
+    price: {
+        type: Number,
+        required: true,
+    },
+    category: {
+        type: String,
+        required: true,
+    },
+    brand: {
         type: String,
         required: true,
     },
@@ -35,17 +35,15 @@ var productSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    sold:{
+    sold: {
         type: Number,
         default: 0,
         // select: false,     this is for if we want to hide this from user
     },
     images: [],
-    color:{
-        type: String,
-        required:true ,
-    },
-    ratings:[
+    color: [],
+    tags: [],
+    ratings: [
         {
             star: Number,
             comment: String,
@@ -61,9 +59,9 @@ var productSchema = new mongoose.Schema({
         default: 0,
     },
 },
-{
-timestamps: true
-});
+    {
+        timestamps: true
+    });
 
 //Export the model
 module.exports = mongoose.model('Product', productSchema);
