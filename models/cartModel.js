@@ -10,7 +10,7 @@ var cartSchema = new mongoose.Schema({
                 type: ObjectId,
                 ref: "Product",
             },
-            count : Number,
+            count: Number,
             color: String,
             price: Number,
         },
@@ -22,9 +22,9 @@ var cartSchema = new mongoose.Schema({
         ref: "User",
     },
 },
-{
-    timestamps: true,
-});
+    {
+        timestamps: true,
+    });
 
 //Export the model
 module.exports = mongoose.model('Cart', cartSchema);
