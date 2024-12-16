@@ -6,156 +6,148 @@ const cloudinaryUploadImg = require("../utils/cloudinary");
 const fs = require("fs");
 
 // Create a Blog
-const createBlog = asyncHandler(async(req, res) => {
-    try{
+const createBlog = asyncHandler(async (req, res) => {
+    try {
         const newBlog = await Blog.create(req.body);
         res.json(newBlog);
-    }catch(error) {
+    } catch (error) {
         throw new Error(error);
     }
 });
 
 
 //Update a blog
-const updateBlog = asyncHandler(async(req, res) => {
+const updateBlog = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongoDbId(id);
-    try{
+    try {
         const updatedBlog = await Blog.findByIdAndUpdate({ _id: id }, req.body, {
             new: true,
-     });
+        });
         res.json(updatedBlog);
-    }catch(error) {
+    } catch (error) {
         throw new Error(error);
     }
 });
 
 //Fetch a Single Blog
-const getBlog = asyncHandler(async(req, res) => {
+const getBlog = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongoDbId(id);
-    try{
+    try {
         const findBlog = await Blog.findById({ _id: id }).populate("likes").populate("dislikes");
-        const updateViews = await Blog.findByIdAndUpdate({ _id: id }, 
+        const updateViews = await Blog.findByIdAndUpdate({ _id: id },
             {
-                $inc: {numViews: 1},
+                $inc: { numViews: 1 },
             },
             {
                 new: true,
             }
         )
         res.json(findBlog);
-    }catch(error) {
+    } catch (error) {
         throw new Error(error);
     }
 });
 
 //Fetch All Blog
-const getAllBlog = asyncHandler(async(req, res) => {
-    try{
+const getAllBlog = asyncHandler(async (req, res) => {
+    try {
         const findAllBlogs = await Blog.find();
         res.json(findAllBlogs);
-    }catch(error) {
+    } catch (error) {
         throw new Error(error);
     }
 });
 
 
 //Delete a blog
-const deleteBlog = asyncHandler(async(req, res) => {
+const deleteBlog = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongoDbId(id);
-    try{
+    try {
         const deletedBlog = await Blog.findByIdAndDelete({ _id: id });
         res.json(deletedBlog);
-    }catch(error) {
+    } catch (error) {
         throw new Error(error);
     }
 });
 
 //Like in a blog
-const likeBlog = asyncHandler(async(req, res) => {
-    const {blogId} = req.body;
+const likeBlog = asyncHandler(async (req, res) => {
+    const { blogId } = req.body;
     validateMongoDbId(blogId);
-    //Find the blog which you want to be liked...
     const blog = await Blog.findById(blogId);
-    //find the login user
     const loginUserId = req?.user?._id;
-    //find if user has liked the blog
     const isLiked = blog?.isLiked;
-    //find the user if he disliked the blog
     const alreadyDisliked = blog?.dislikes?.find((userId => userId?.toString() === loginUserId?.toString()));
-    if(alreadyDisliked){
+    if (alreadyDisliked) {
         const blogDislike = await Blog.findByIdAndUpdate(blogId, {
-            $pull: {dislikes: loginUserId},
-            isDisliked : false,
+            $pull: { dislikes: loginUserId },
+            isDisliked: false,
         }, {
             new: true
-           }
+        }
         );
         res.json(blogDislike);
     }
-    if(isLiked){
+    if (isLiked) {
         const blogLike = await Blog.findByIdAndUpdate(blogId, {
-            $pull: {likes: loginUserId},
-            isLiked : false,
+            $pull: { likes: loginUserId },
+            isLiked: false,
         }, {
             new: true
-           }
+        }
         );
         res.json(blogLike);
     }
-    else{
+    else {
         const blog = await Blog.findByIdAndUpdate(blogId, {
-            $push: {likes: loginUserId},
-            isLiked : true,
+            $push: { likes: loginUserId },
+            isLiked: true,
         }, {
             new: true
-           }
+        }
         );
         res.json(blog);
     }
 });
 
 //Dislike the Blog
-const dislikeBlog = asyncHandler(async(req, res) => {
-    const {blogId} = req.body;
+const dislikeBlog = asyncHandler(async (req, res) => {
+    const { blogId } = req.body;
     validateMongoDbId(blogId);
-    //Find the blog which you want to be liked...
     const blog = await Blog.findById(blogId);
-    //find the login user
     const loginUserId = req?.user?._id;
-    //find if user has liked the blog
     const isDisliked = blog?.isDisliked;
-    //find the user if he disliked the blog
     const alreadyLiked = blog?.likes?.find((userId => userId?.toString() === loginUserId?.toString()));
-    if(alreadyLiked){
+    if (alreadyLiked) {
         const blogLike = await Blog.findByIdAndUpdate(blogId, {
-            $pull: {likes: loginUserId},
-            isLiked : false,
+            $pull: { likes: loginUserId },
+            isLiked: false,
         }, {
             new: true
-           }
+        }
         );
         res.json(blogLike);
     }
-    if(isDisliked){
+    if (isDisliked) {
         const blogDislike = await Blog.findByIdAndUpdate(blogId, {
-            $pull: {dislikes: loginUserId},
-            isDisliked : false,
+            $pull: { dislikes: loginUserId },
+            isDisliked: false,
         }, {
             new: true
-           }
+        }
         );
         res.json(blogDislike);
     }
-    else{
+    else {
         const blog = await Blog.findByIdAndUpdate(blogId, {
-            $push: {dislikes: loginUserId},
-            isDisliked : true,
+            $push: { dislikes: loginUserId },
+            isDisliked: true,
         }, {
             new: true
-           }
+        }
         );
         res.json(blog);
     }
@@ -164,37 +156,35 @@ const dislikeBlog = asyncHandler(async(req, res) => {
 
 const uploadImages = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    validateMongoDbId(id); // Validate the MongoDB ObjectId
-  
-    try {
-      const uploader = (path) => cloudinaryUploadImg(path, "images");
-      const urls = [];
-      const files = req.files;
-  
-      // Iterate over each file and upload to Cloudinary
-      for (const file of files) {
-        const { path } = file; // Destructure the file path from each file
-        const newPath = await uploader(path); // Upload to Cloudinary and get the URL
-        urls.push(newPath); // Store the returned URL
-        fs.unlinkSync(path);
-      }
-  
-      // Update the blog with the new image URLs
-      const newBlog = await Blog.findByIdAndUpdate(
-        { _id: id },
-        {
-          images: urls, // Save the URLs in the images field
-        },
-        {
-          new: true, // Return the updated document
-        }
-      );
-  
-      res.json(newBlog); // Return the updated Blog
-    } catch (error) {
-      throw new Error(error); // Pass the error to the async handler
-    }
-  });
-  
+    validateMongoDbId(id);
 
-module.exports = { createBlog, updateBlog, getBlog, getAllBlog, deleteBlog, likeBlog, dislikeBlog, uploadImages};
+    try {
+        const uploader = (path) => cloudinaryUploadImg(path, "images");
+        const urls = [];
+        const files = req.files;
+
+        for (const file of files) {
+            const { path } = file;
+            const newPath = await uploader(path);
+            urls.push(newPath);
+            fs.unlinkSync(path);
+        }
+
+        const newBlog = await Blog.findByIdAndUpdate(
+            { _id: id },
+            {
+                images: urls,
+            },
+            {
+                new: true,
+            }
+        );
+
+        res.json(newBlog);
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+
+
+module.exports = { createBlog, updateBlog, getBlog, getAllBlog, deleteBlog, likeBlog, dislikeBlog, uploadImages };

@@ -11,6 +11,7 @@ const blogCategoryRouter = require("./routes/blogCategoryRoute");
 const brandRouter = require("./routes/brandRoute");
 const colorRouter = require("./routes/colorRoute");
 const couponRouter = require("./routes/couponRoute");
+const uploadRouter = require("./routes/uploadRoute");
 const enquiryRouter = require("./routes/enquiryRoute");
 const bodyParser = require("body-parser");
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
@@ -30,6 +31,7 @@ app.use(cors());
 
 app.use("/api/user", authRouter);
 app.use("/api/product", productRouter);
+app.use("/api/upload", uploadRouter);
 app.use("/api/blog", blogRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/blogcategory", blogCategoryRouter);
